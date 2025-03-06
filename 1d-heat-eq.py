@@ -19,7 +19,7 @@ k                       # thermal conductivity of rod medium
 '''
 
 # stability condition: fourier number, F_0 <= 0.5
-# F_0 = alpha * dt . dx**2
+# F_0 = alpha * dt / dx**2
 
 
 def heat_model_dmsnless():
