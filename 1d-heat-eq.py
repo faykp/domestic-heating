@@ -23,7 +23,7 @@ k                       # thermal conductivity of rod medium
 
 
 def heat_model_dmsnless():
-    #1d heat equation dimensionless solution
+    # 1d heat equation dimensionless solution
 
     # initial temperature distribution
     u_i = np.zeros(n_x)
@@ -54,10 +54,10 @@ def heat_model_dmsnless():
 
 
 def heat_model(l, t_b, t_i, alpha = 0.14e-6, t_final = 3600):
-    #1d heat equation dimensional solution
+    # 1d heat equation dimensional solution
 
-    #default alpha: thermal diffusivity of water
-    #default t_final: 1 hour
+    # default alpha: thermal diffusivity of water
+    # default t_final: 1 hour
 
     dx_d = dx * l
     dt_d = 0.5 * dx_d**2 / alpha
@@ -102,9 +102,105 @@ def heat_model(l, t_b, t_i, alpha = 0.14e-6, t_final = 3600):
 # heat emitter functions
 #############################
 
-
 def heat_emitter_dmsnless():
+    # 1d heat equation dimensionless solution
+    # boundary walls at fixed temp
+
+    # initial temperature distribution
+    u_i = np.zeros(n_x)
+    u_i[0] = 1.0
+
+    u = [u_i.copy()]
+    f = [u_i.copy()]
+
+    n_t = int(t_final / dt) + 1
+
+    x = np.linspace(0,1,n_x)
+
+    # time evolution
+    for t in range(n_t-1):
+        u_new = u_i.copy()
+        for i in range(1, n_x-1):
+            # finite difference method
+            u_new[i] = u_i[i] + dt / dx**2 * (u_i[i+1] - 2*u_i[i] + u_i[i-1])
+
+        u_i = u_new.copy()
+        u.append(u_new)
+
+        # fourier approximation
+        f.append([fourier_series_emitter((t + 1) * dt, x_i) for x_i in x])
+
+    plot_graphs(u, f, n_x, n_t)
+
+def heat_emitter_dmsnless_t():
     #1d heat equation dimensionless solution for heat emitter
+    # boundary wall with flux
+
+    # initial temperature distribution
+    u_i = 0.5 * np.ones(n_x)
+    u_i[0] = 1.0
+
+    u = [u_i.copy()]
+    f = [u_i.copy()]
+
+    n_t = int(t_final / dt) + 1
+
+    x = np.linspace(0,1,n_x)
+
+    # time evolution
+    for t in range(n_t-1):
+        u_new = u_i.copy()
+
+        for i in range(1, n_x-1):
+            # finite difference method
+            u_new[i] = u_i[i] + dt / dx**2 * (u_i[i+1] - 2*u_i[i] + u_i[i-1])
+
+        u_new[-1] = u_new[-2] - dx
+        u_i = u_new.copy()
+
+        u.append(u_new)
+
+        # fourier approximation
+        f.append([fourier_series_emitter_t((t + 1) * dt, 0.5, x_i) for x_i in x])
+    
+    plot_graphs(u, f, n_x, n_t)
+
+def heat_emitter_dmsnless_p():
+    #1d heat equation dimensionless solution for heat emitter
+    # boundary wall with zero flux
+
+    # initial temperature distribution
+    u_i = np.zeros(n_x)
+    u_i[0] = 1.0
+
+    u = [u_i.copy()]
+    f = [u_i.copy()]
+
+    n_t = int(t_final / dt) + 1
+
+    x = np.linspace(0,1,n_x)
+
+    # time evolution
+    for t in range(n_t-1):
+        u_new = u_i.copy()
+
+        for i in range(1, n_x-1):
+            # finite difference method
+            u_new[i] = u_i[i] + dt / dx**2 * (u_i[i+1] - 2*u_i[i] + u_i[i-1])
+
+        u_new[-1] = u_new[-2]
+        u_i = u_new.copy()
+
+        u.append(u_new)
+
+        # fourier approximation
+        f.append([fourier_series_emitter_p((t + 1) * dt, x_i) for x_i in x])
+    
+    plot_graphs(u, f, n_x, n_t)
+
+def heat_emitter_dmsnless_f():
+    # 1d heat equation dimensionless solution for heat emitter
+    # emitter boundary wall with flux
 
     # initial temperature distribution
     u_i = np.zeros(n_x)
@@ -129,17 +225,17 @@ def heat_emitter_dmsnless():
         u.append(u_new)
 
         # fourier approximation
-        f.append([fourier_series_emitter((t + 1) * dt, x_i) for x_i in x])
+        f.append([fourier_series_emitter_f((t + 1) * dt, x_i) for x_i in x])
     
     plot_graphs(u, f, n_x, n_t)
 
 
-def heat_emitter_model(l, t_i, q, k = 0.026, alpha = 22e-6, t_final = 3600):
-    #1d heat equation dimensional solution for heat emitter
+def heat_emitter_model_f(l, t_i, q, k = 0.026, alpha = 22e-6, t_final = 3600):
+    # 1d heat equation dimensional solution for heat emitter
 
-    #default k: thermal conductivity of air
-    #default alpha: thermal diffusivity of air
-    #default t_final: 1 hour
+    # default k: thermal conductivity of air
+    # default alpha: thermal diffusivity of air
+    # default t_final: 1 hour
 
     dx_d = dx * l
     dt_d = 0.5 * dx_d**2 / alpha
@@ -147,7 +243,6 @@ def heat_emitter_model(l, t_i, q, k = 0.026, alpha = 22e-6, t_final = 3600):
     # initial temperature distribution
     u_i = np.zeros(n_x)
     u_i[0] = 1.0
-    u_i[-1] = 1.0
     u = [u_i.copy()]
 
     t_1 = t_i * np.ones(n_x)
@@ -163,7 +258,7 @@ def heat_emitter_model(l, t_i, q, k = 0.026, alpha = 22e-6, t_final = 3600):
     # time evolution
     for n in range(n_t - 1):
         u_new = u_i.copy()
-        u_i[0] = u_i[1] + dx
+        u_i[0] = u_i[1] + dx * q
 
         for i in range(1, n_x - 1):
             #finite difference method (FDM)
@@ -176,7 +271,7 @@ def heat_emitter_model(l, t_i, q, k = 0.026, alpha = 22e-6, t_final = 3600):
         t.append([t_i + (q * l / k) * u_new[i] for i in range(n_x)])
 
         # fourier approximation
-        f.append([t_i + (q * l / k) * fourier_series_emitter((n + 1) * dt_d * alpha / l**2, x_i / l) for x_i in x])
+        f.append([t_i + (q * l / k) * fourier_series_emitter_f((n + 1) * dt_d * alpha / l**2, x_i / l) for x_i in x])
 
     t_b = t_i + q*l/k
     plot_graphs(t, f, n_x, n_t, False, l, t_i, t_b, t_final)
@@ -195,9 +290,33 @@ def fourier_series(t, x, i = 100):
     return theta
 
 def fourier_series_emitter(t, x, i = 100):
-    # fourier series for heat emitter
+    # fourier series for heat emitter at fixed temp
+    # right boundary at fixed temp
 
-    theta = -(x - 1) + sum(-8/(((2*n+1)*(np.pi))**2)
+    theta = 1 - x + sum(-2/(n*np.pi)
+                * np.exp((-(n*np.pi)**2)*t) * np.sin((n*np.pi*x)) for n in range(1,i))
+    return theta
+
+def fourier_series_emitter_t(t, t_i, x, i = 100):
+    # fourier series for heat emitter at fixed temp
+    # right boundary with flux
+
+    theta = 1 - x + sum(((8*(-1)**n)/(((2*n+1)*(np.pi))**2) + 4*(t_i-1)/((2*n+1)*np.pi))
+                * np.exp(-(((2*n+1)*np.pi/2)**2)*t) * np.sin((2*n+1)*np.pi*x/2) for n in range(i))
+    return theta
+
+def fourier_series_emitter_p(t, x, i = 100):
+    # fourier series for heat emitter at fixed temp
+    # right boundary with zero flux
+
+    theta = 1 + sum((4*(-1)/((2*n+1)*np.pi))
+                * np.exp(-(((2*n+1)*np.pi/2)**2)*t) * np.sin((2*n+1)*np.pi*x/2) for n in range(i))
+    return theta
+
+def fourier_series_emitter_f(t, x, i = 100):
+    # fourier series for heat emitter with flux
+
+    theta = 1 - x + sum(-8/(((2*n+1)*(np.pi))**2)
                 * np.exp(-(((2*n+1)*np.pi/2)**2)*t) * np.cos((2*n+1)*np.pi*x/2) for n in range(i))
     return theta
 
