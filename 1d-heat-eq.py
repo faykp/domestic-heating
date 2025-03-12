@@ -214,8 +214,8 @@ def heat_emitter_dmsnless_f():
 
     # time evolution
     for t in range(n_t-1):
-        u_new = u_i.copy()
         u_i[0] = u_i[1] + dx
+        u_new = u_i.copy()
 
         for i in range(1, n_x-1):
             # finite difference method
@@ -257,8 +257,8 @@ def heat_emitter_model_f(l, t_i, q, k = 0.026, alpha = 22e-6, t_final = 3600):
 
     # time evolution
     for n in range(n_t - 1):
-        u_new = u_i.copy()
         u_i[0] = u_i[1] + dx * q
+        u_new = u_i.copy()
 
         for i in range(1, n_x - 1):
             #finite difference method (FDM)
